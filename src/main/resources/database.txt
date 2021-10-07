@@ -1,0 +1,5 @@
+CREATE DATABASE MYDIPLOM;
+CREATE TABLE ATHLETES(id int PRIMARY KEY AUTO_INCREMENT, name VARCHAR(50), surname VARCHAR(50),
+ patronymic VARCHAR(50), birthday DATE, gender VARCHAR(50), sport VARCHAR(50),
+                     hand VARCHAR(50), qualification VARCHAR(50));
+CREATE TABLE CSVFILES(name VARCHAR(50), AthletId int, FOREIGN KEY (AthletId) REFERENCES ATHLETES(id));
