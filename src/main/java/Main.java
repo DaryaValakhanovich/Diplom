@@ -39,7 +39,7 @@ public class Main {
        // for(String[] row : allRows){
      //       System.out.println(Arrays.toString(row));
      //  List<Jump> jumps = readJumps("Countermovement jump.csv");
-Connection c = ConnectionManager.getConnection();
+//Connection c = ConnectionManager.getConnection();
        }
 
     public static List<Jump> readJumps(String fileName) throws IOException {

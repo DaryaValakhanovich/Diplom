@@ -18,10 +18,13 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.File;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Run extends Application{
+        private long currentAthleteId = 1L;
         private String filename = null;
-        private String path;
+        private String path = "";
         static {
             nu.pattern.OpenCV.loadShared();
            // System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -34,8 +37,8 @@ public class Run extends Application{
             final FileChooser fileChooser = new FileChooser();
             root.setAlignment(Pos.CENTER);
             Button button = new Button("Добавить спортсмена");
-            Button button2 = new Button("Преобразование из RGB в Gray");
-            Button button3 = new Button("Перемещение");
+            Button button2 = new Button("Показать всех атлетов");
+            Button button3 = new Button("Загрузить csv файл");
             Button button4 = new Button("Масштабирование");
             Button button7 = new Button("Поворот");
             Button button5 = new Button("Сдвиг");
@@ -43,8 +46,8 @@ public class Run extends Application{
             Button button8 = new Button("Выбрать изображение");
             Button button17 = new Button("Сохранить как");
             button.setOnAction(this::addAthlete);
-            button2.setOnAction(this::convertingFromRGBtoGray);
-            button3.setOnAction(this::moving);
+            button2.setOnAction(this::showAthletes);
+            button3.setOnAction(this::addCsvFile);
             button4.setOnAction(this::scaling);
             button7.setOnAction(this::turn);
             button5.setOnAction(this::shift);
@@ -147,30 +150,52 @@ public class Run extends Application{
                     text1, text2, text3, text4, text5, text6, text7, text8);
             newStage.setScene(newScene);
             newStage.show();
-
-            int movingX = Integer.parseInt(input1.getText());
-        }
-
-        private void convertingFromRGBtoGray(ActionEvent e) {
-            // Загружаем изображение из файла
-            Mat img;
-            try {
-                img = Imgcodecs.imread(filename);
-                if (img.empty()) {
-                    throw new Exception("Не удалось загрузить изображение");
+            System.out.println("www");
+            newButton.setOnAction(ev -> {
+                try {
+                    System.out.println("qqq");
+                    System.out.println(input1.getText());
+                    Athlete athlete = new Athlete();
+                    athlete.setName(input1.getText());
+                    athlete.setSurname(input2.getText());
+                    athlete.setPatronymic(input3.getText());
+                    athlete.setBirthday(LocalDate.parse(input4.getText()));
+                    athlete.setGender(Gender.valueOf(input5.getText()));
+                    athlete.setSport(input6.getText());
+                    athlete.setDominantHand(DominantHand.valueOf(input7.getText()));
+                    athlete.setQualification(input8.getText());
+                    System.out.println(athlete.toString());
+                    AthleteDAO.getInstance().create(athlete);
                 }
-            } catch (Exception e1){
-                System.out.println(e1.getMessage());
-                return;
-            }
-            // Отображаем в отдельном окне
-            Mat img2 = new Mat();
-            Imgproc.cvtColor(img, img2, Imgproc.COLOR_BGR2GRAY);
-            CvUtilsFX.showImage(img2, "Gray");
-            // Сохраняем изображение в файл
-            CvUtilsFX.saveImage(img2, path+"\\grayExample.jpg");
+                catch (Exception ignored){
+                    System.out.println(ignored.getMessage());
+                }
+        });
         }
-        private void moving(ActionEvent e) {
+
+        private void showAthletes(ActionEvent e) {
+            Stage newStage = new Stage();
+            newStage.setTitle("All athletes");
+            Group root = new Group();
+            Scene newScene = new Scene(root, 400, 400);
+            List<Athlete> athletes = AthleteDAO.getInstance().findAll();
+            Text text1 = new Text();
+            int x = 30;
+            int y = 30;
+            List<Text> texts = new ArrayList<>();
+            for (Athlete athlete:athletes) {
+                text1 = new Text();
+                text1.setText(athlete.toString());
+                text1.setLayoutX(x);
+                text1.setLayoutY(y);
+                texts.add(text1);
+                y+=40;
+            }
+            root.getChildren().addAll(texts);
+            newStage.setScene(newScene);
+            newStage.show();
+        }
+        private void addCsvFile(ActionEvent e) {
             // Загружаем изображение из файла
             Mat img;
             try {
@@ -235,265 +260,6 @@ public class Run extends Application{
                 } catch (NumberFormatException ignored){}
                 newStage.close();
             });
-        }
-        private void scaling(ActionEvent e) {
-            // Загружаем изображение из файла
-            Mat img;
-            try {
-                img = Imgcodecs.imread(filename);
-                if (img.empty()) {
-                    throw new Exception("Не удалось загрузить изображение");
-                }
-            } catch (Exception e1){
-                System.out.println(e1.getMessage());
-                return;
-            }
-            Stage newStage = new Stage();
-            newStage.setTitle("Chose parameters");
-            Group root = new Group();
-            Scene newScene = new Scene(root, 300, 130);
-            Button newButton = new Button();
-            newButton.setLayoutX(130);
-            newButton.setLayoutY(100);
-            newButton.setText("OK");
-
-            Text text1 = new Text();
-            text1.setText("X:");
-            text1.setLayoutX(10);
-            text1.setLayoutY(30);
-            Text text2 = new Text();
-            text2.setText("Y:");
-            text2.setLayoutX(10);
-            text2.setLayoutY(70);
-            TextField input1 = new TextField();
-            input1.setLayoutX(120);
-            input1.setLayoutY(10);
-            TextField input2 = new TextField();
-            input2.setLayoutX(120);
-            input2.setLayoutY(50);
-
-            root.getChildren().addAll(newButton, input1, input2, text1, text2);
-            newStage.setScene(newScene);
-            newStage.show();
-            newButton.setOnAction(event16 -> {
-                try {
-                    double movingX = Double.parseDouble(input1.getText());
-                    double movingY = Double.parseDouble(input2.getText());
-                    double movX = movingX;
-                    if (movX <= 0) {
-                        movX = 1;
-                    }
-                    double movY = movingY;
-                    if (movY <= 0) {
-                        movY = 1;
-                    }
-                    // Трансформация масштабирования
-                    Mat M2 = new Mat(2, 3, CvType.CV_32FC1);
-                    M2.put(0, 0,
-                            movX, 0, 0,
-                            0, movY, 0
-                    );
-                    Mat img3 = new Mat();
-                    Imgproc.warpAffine(img, img3, M2,
-                            new Size(img.width()*movX, img.height()*movY),
-                            Imgproc.INTER_CUBIC, Core.BORDER_CONSTANT,
-                            new Scalar(0, 0, 0, 0));
-                    // Отображаем в отдельном окне
-                    CvUtilsFX.showImage(img3, "Масштабирование");
-                    // Сохраняем изображение в файл
-                    CvUtilsFX.saveImage(img3, path+"scalingExample.jpg");
-                } catch (NumberFormatException ignored){}
-                newStage.close();
-            });
-        }
-        private void turn(ActionEvent e) {
-            // Загружаем изображение из файла
-            Mat img;
-            try {
-                img = Imgcodecs.imread(filename);
-                if (img.empty()) {
-                    throw new Exception("Не удалось загрузить изображение");
-                }
-            } catch (Exception e1){
-                System.out.println(e1.getMessage());
-                return;
-            }
-            Stage newStage = new Stage();
-            newStage.setTitle("Chose parameters");
-            Group root = new Group();
-            Scene scene19 = new Scene(root, 300, 110);
-            Button btn = new Button();
-            btn.setLayoutX(130);
-            btn.setLayoutY(50);
-            btn.setText("OK");
-            Text text = new Text();
-            text.setText("angle:");
-            text.setLayoutX(10);
-            text.setLayoutY(30);
-            TextField input = new TextField();
-            input.setLayoutX(90);
-            input.setLayoutY(10);
-            root.getChildren().addAll(btn, input, text);
-            newStage.setScene(scene19);
-            newStage.show();
-            btn.setOnAction(event12 -> {
-                try {
-                    int angle = Integer.parseInt(input.getText());
-                    // Обрабатываем изображение
-                    // Трансформация вращения
-                    Mat M = Imgproc.getRotationMatrix2D(
-                            new Point(img.width() / 2., img.height() / 2.), angle, 1);
-                    Mat img2 = new Mat();
-                    Imgproc.warpAffine(img, img2, M,
-                            new Size(img.width()*2, img.height()*2),
-                            Imgproc.INTER_LINEAR, Core.BORDER_TRANSPARENT,
-                            new Scalar(0, 0, 0, 255));
-                    // Отображаем в отдельном окне
-                    CvUtilsFX.showImage(img2, "Вращение на ... градусов");
-                    // Сохраняем изображение в файл
-                    CvUtilsFX.saveImage(img2, path+"turnExample.jpg");
-                } catch (NumberFormatException | CvException ignored) { }
-                newStage.close();
-            });
-        }
-        private void shift(ActionEvent e) {
-            // Загружаем изображение из файла
-            Mat  img;
-            try {
-                img = Imgcodecs.imread(filename);
-                if (img.empty()) {
-                    throw new Exception("Не удалось загрузить изображение");
-                }
-            } catch (Exception e1){
-                System.out.println(e1.getMessage());
-                return;
-            }
-            Stage newStage = new Stage();
-            newStage.setTitle("Chose parameters");
-            Group root = new Group();
-            Scene scene19 = new Scene(root, 300, 110);
-            Button btn = new Button();
-            btn.setLayoutX(130);
-            btn.setLayoutY(50);
-            btn.setText("OK");
-            Text text = new Text();
-            text.setText("parameter:");
-            text.setLayoutX(10);
-            text.setLayoutY(30);
-            TextField input = new TextField();
-            input.setLayoutX(90);
-            input.setLayoutY(10);
-            root.getChildren().addAll(btn, input, text);
-            newStage.setScene(scene19);
-            newStage.show();
-            btn.setOnAction(event12 -> {
-                try {
-                    int angle = Integer.parseInt(input.getText());
-                    // Обрабатываем изображение
-                    // Трансформация сдвига
-                    Mat M3 = new Mat(2, 3, CvType.CV_32FC1);
-                    M3.put(0, 0,
-                            1, angle, 10,
-                            0, 1, 10
-                    );
-                    Mat img4 = new Mat();
-                    Imgproc.warpAffine(img, img4, M3,
-                            new Size(img.width() * 1.5, img.height() * 1.5),
-                            Imgproc.INTER_LINEAR, Core.BORDER_CONSTANT,
-                            new Scalar(0, 0, 0, 0));
-                    // Отображаем в отдельном окне
-                    CvUtilsFX.showImage(img4, "Сдвиг");
-                    // Сохраняем изображение в файл
-                    CvUtilsFX.saveImage(img4, path+"shiftExample.jpg");
-                } catch (NumberFormatException | CvException ignored) { }
-                newStage.close();
-            });
-        }
-        private void outputEachChannel(ActionEvent e) {
-            // Загружаем изображение из файла
-            Mat  img;
-            try {
-                img = Imgcodecs.imread(filename);
-                if (img.empty()) {
-                    throw new Exception("Не удалось загрузить изображение");
-                }
-            } catch (Exception e1){
-                System.out.println(e1.getMessage());
-                return;
-            }
-            int type = BufferedImage.TYPE_BYTE_GRAY;
-            if (img.channels() > 1) {
-                type = BufferedImage.TYPE_3BYTE_BGR;
-            }
-            BufferedImage image = new BufferedImage(img.cols(), img.rows(), type);
-
-            img.get(0, 0, ((DataBufferByte)image.getRaster().getDataBuffer()).getData());
-            // Обрабатываем изображение
-            int width = image.getWidth();
-            int height = image.getHeight();
-            for(int y=0;y<height;y++) {
-                for (int x = 0; x < width; x++) {
-                    int p = image.getRGB(x, y);
-                    int a = (p >> 24) & 0xff;
-                    int g = (p >> 8) & 0xff;
-                    p = (a << 24) | (0) | (g << 8);
-                    image.setRGB(x, y, p);
-                }
-            }
-
-            Mat im = CvUtilsFX.BufferedImageToMat(image);
-            CvUtilsFX.showImage(im, "green" );
-            // Сохраняем изображение в файл
-            CvUtilsFX.saveImage(im, path+"exampleChanel"  + ".jpg");
-            im.release();
-            // Обрабатываем изображение
-            int width1 = image.getWidth();
-            int height1 = image.getHeight();
-            for(int y=0;y<height1;y++) {
-                for (int x = 0; x < width1; x++) {
-
-                    int p = image.getRGB(x, y);
-                    int a = (p >>24) & 0x0ff;
-                    int g = (p>> 8) & 0x00ff;
-                    p = (a << 16) | (0) | (g<<8);
-                    image.setRGB(x, y, p);
-                }
-            }
-
-            Mat im2 = CvUtilsFX.BufferedImageToMat(image);
-            CvUtilsFX.showImage(im2, "Red");
-
-// Обрабатываем изображение
-            int width2 = image.getWidth();
-            int height2 = image.getHeight();
-            for(int y=0;y<height2;y++) {
-                for (int x = 0; x < width2; x++) {
-
-                    int p = image.getRGB(x, y);
-                    int a = (p >>24) & 0x0ff;
-                    int g = (p>> 8) & 0x00ff;
-                    p = (a) | (0) | (g <<8);
-                    image.setRGB(x, y, p);
-                }
-            }
-
-            Mat im1 = CvUtilsFX.BufferedImageToMat(image);
-            CvUtilsFX.showImage(im1, "Blue");
-        }
-        private void outputOnDisplay(ActionEvent e) {
-            // Загружаем изображение из файла
-            Mat  img;
-            try {
-                img = Imgcodecs.imread(filename);
-                if (img.empty()) {
-                    throw new Exception("Не удалось загрузить изображение");
-                }
-            } catch (Exception e1){
-                System.out.println(e1.getMessage());
-                return;
-            }
-            // Отображаем в отдельном окне
-            CvUtilsFX.showImage(img, "Текст в заголовке окна");
         }
         private void setFilters(FileChooser chooser) {
             chooser.getExtensionFilters().addAll(

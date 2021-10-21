@@ -10,44 +10,44 @@ import java.util.Optional;
 public class AthleteDAO {
     public List<Athlete> findAll(){
         List<Athlete> list = new ArrayList<>();
-     //   try (ResultSet resultSet = ConnectionManager.getConnection()
-   //             .prepareStatement(getSelectAllQuery()).executeQuery()) {
-      //      while (resultSet.next()) {
-      //          list.add(createFromResultSet(resultSet));
-       //     }
-    //    } catch (SQLException e) {
-    //        e.printStackTrace();
-    //    }
+       try (ResultSet resultSet = ConnectionManager.getConnection()
+              .prepareStatement(getSelectAllQuery()).executeQuery()) {
+          while (resultSet.next()) {
+               list.add(createFromResultSet(resultSet));
+         }
+       } catch (SQLException e) {
+            e.printStackTrace();
+       }
         return list;
     }
 
-    public Optional<Athlete> findById(long id) {
-    //    try (PreparedStatement preparedStatement = ConnectionManager.getConnection()
-      //          .prepareStatement(getSelectQueryById())) {
-     //       preparedStatement.setLong(1, id);
-     //       try(ResultSet resultSet = preparedStatement.executeQuery()) {
-      //          if (resultSet.next()) {
-       //             return Optional.of(createFromResultSet(resultSet));
-       //         }
-      //      }
-    //    } catch (SQLException e) {
-     //       e.printStackTrace();
-     //   }
-        return Optional.empty();
+    public Athlete findById(long id) {
+     try (PreparedStatement preparedStatement = ConnectionManager.getConnection()
+               .prepareStatement(getSelectQueryById())) {
+          preparedStatement.setLong(1, id);
+          try(ResultSet resultSet = preparedStatement.executeQuery()) {
+               if (resultSet.next()) {
+                   return Optional.of(createFromResultSet(resultSet)).get();
+              }
+          }
+       } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return new Athlete();
     }
 
     public Athlete create(Athlete object) {
-    //    try (PreparedStatement preparedStatement = ConnectionManager.getConnection()
-      //          .prepareStatement(getCreateQuery(), Statement.RETURN_GENERATED_KEYS)) {
-        //    prepareStatementForCreate(preparedStatement, object);
-         //   preparedStatement.executeUpdate();
-          //  ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
-          //  if (generatedKeys.next()) {
-            //    object.setId(generatedKeys.getLong(1));
-     //       }
-       // } catch (SQLException e) {
-         //   e.printStackTrace();
-        //}
+        try (PreparedStatement preparedStatement = ConnectionManager.getConnection()
+               .prepareStatement(getCreateQuery(), Statement.RETURN_GENERATED_KEYS)) {
+            prepareStatementForCreate(preparedStatement, object);
+            preparedStatement.executeUpdate();
+            ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                object.setId(generatedKeys.getLong(1));
+           }
+      } catch (SQLException e) {
+          e.printStackTrace();
+        }
         return object;
     }
 
@@ -107,6 +107,25 @@ public class AthleteDAO {
         return  athlete;
     }
 
+    public void delete(long id) {
+        try (PreparedStatement preparedStatement = ConnectionManager.getConnection()
+                .prepareStatement("DELETE * FROM ATHLETES " +
+                        "WHERE id = ?")) {
+            preparedStatement.setLong(1, id);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
-
+    public void addCsvFile(long athleteId, String fileName){
+        try (PreparedStatement preparedStatement = ConnectionManager.getConnection()
+                .prepareStatement("INSERT INTO csvfiles (name, AthleteId) VALUES (?, ?)")) {
+            preparedStatement.setString(1, fileName);
+            preparedStatement.setLong(2, athleteId);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

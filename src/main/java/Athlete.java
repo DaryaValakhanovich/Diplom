@@ -113,4 +113,20 @@ public class Athlete {
     public void addCsvFile(String file){
         csvFiles.add(file);
     }
+
+    @Override
+    public String toString() {
+        return "Athlete{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", surname='" + surname + '\'' +
+                ", patronymic='" + patronymic + '\'' +
+                ", birthday=" + birthday +
+                ", gender=" + gender +
+                ", sport='" + sport + '\'' +
+                ", dominantHand=" + dominantHand +
+                ", qualification='" + qualification + '\'' +
+                ", csvFiles=" + csvFiles +
+                '}';
+    }
 }
