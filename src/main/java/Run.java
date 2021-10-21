@@ -48,10 +48,6 @@ public class Run extends Application{
             button.setOnAction(this::addAthlete);
             button2.setOnAction(this::showAthletes);
             button3.setOnAction(this::addCsvFile);
-            button4.setOnAction(this::scaling);
-            button7.setOnAction(this::turn);
-            button5.setOnAction(this::shift);
-            button6.setOnAction(this::outputEachChannel);
             button8.setOnAction(e -> {
                 setFilters(fileChooser);
                 filename = fileChooser.showOpenDialog(stage).toPath().toString();
