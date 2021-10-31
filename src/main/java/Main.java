@@ -14,7 +14,7 @@ import java.util.List;
 public class Main {
     @SuppressWarnings("resource")
     public static void main(String[] args) throws IOException, NoSuchMethodException, SQLException, ClassNotFoundException {
-     //       String csv = "data.csv";
+      //     String csv = "data.csv";
    //        CSVWriter writer = new CSVWriter(new FileWriter(csv));
         //Create record
     //       String [] record = "4,David,Miller,Australia,30".split(",");
@@ -38,7 +38,8 @@ public class Main {
         //Read CSV line by line and use the string array as you want
        // for(String[] row : allRows){
      //       System.out.println(Arrays.toString(row));
-     //  List<Jump> jumps = readJumps("Countermovement jump.csv");
+       List<Jump> jumps = readJumps("Countermovement jump.csv");
+       //jumps.forEach(System.out::println);
 //Connection c = ConnectionManager.getConnection();
        }
 
@@ -51,6 +52,7 @@ public class Main {
         ArrayList<Jump> jumps = new ArrayList<Jump>();
         Jump jump = new Jump();
         for(int i = 1; i < allRows.size(); i++){
+            jump = new Jump();
             String[] row = allRows.get(i);
             jump.setTimestamp(Double.parseDouble (row[0]));
             jump.setSync(Double.parseDouble (row[1]));
@@ -63,7 +65,7 @@ public class Main {
             jump.setCoPx(Double.parseDouble (row[8]));
             jump.setCoPy(Double.parseDouble (row[9]));
             jumps.add(jump);
-           // System.out.println(jump.toString());
+            System.out.println(jump.toString());
         }
         return jumps;
     }

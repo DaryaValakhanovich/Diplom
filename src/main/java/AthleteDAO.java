@@ -10,27 +10,27 @@ import java.util.Optional;
 public class AthleteDAO {
     public List<Athlete> findAll(){
         List<Athlete> list = new ArrayList<>();
-       try (ResultSet resultSet = ConnectionManager.getConnection()
-              .prepareStatement(getSelectAllQuery()).executeQuery()) {
-          while (resultSet.next()) {
-               list.add(createFromResultSet(resultSet));
-         }
-       } catch (SQLException e) {
+        try (ResultSet resultSet = ConnectionManager.getConnection()
+                .prepareStatement(getSelectAllQuery()).executeQuery()) {
+            while (resultSet.next()) {
+                list.add(createFromResultSet(resultSet));
+            }
+        } catch (SQLException e) {
             e.printStackTrace();
-       }
+        }
         return list;
     }
 
     public Athlete findById(long id) {
-     try (PreparedStatement preparedStatement = ConnectionManager.getConnection()
-               .prepareStatement(getSelectQueryById())) {
-          preparedStatement.setLong(1, id);
-          try(ResultSet resultSet = preparedStatement.executeQuery()) {
-               if (resultSet.next()) {
-                   return Optional.of(createFromResultSet(resultSet)).get();
-              }
-          }
-       } catch (SQLException e) {
+        try (PreparedStatement preparedStatement = ConnectionManager.getConnection()
+                .prepareStatement(getSelectQueryById())) {
+            preparedStatement.setLong(1, id);
+            try(ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return Optional.of(createFromResultSet(resultSet)).get();
+                }
+            }
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return new Athlete();
@@ -38,39 +38,52 @@ public class AthleteDAO {
 
     public Athlete create(Athlete object) {
         try (PreparedStatement preparedStatement = ConnectionManager.getConnection()
-               .prepareStatement(getCreateQuery(), Statement.RETURN_GENERATED_KEYS)) {
+                .prepareStatement(getCreateQuery(), Statement.RETURN_GENERATED_KEYS)) {
             prepareStatementForCreate(preparedStatement, object);
             preparedStatement.executeUpdate();
             ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
             if (generatedKeys.next()) {
                 object.setId(generatedKeys.getLong(1));
-           }
-      } catch (SQLException e) {
-          e.printStackTrace();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return object;
+    }
+
+    public Athlete update(Athlete object) {
+        try (PreparedStatement preparedStatement = ConnectionManager.getConnection()
+                .prepareStatement(getUpdateQuery())) {
+            prepareStatementForCreate(preparedStatement, object);
+            preparedStatement.setLong(9, object.getId());
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return object;
     }
 
     private static final String ATHLETE_TABLE_NAME = "ATHLETES";
-    private static AthleteDAO INSTANCE = null;
 
 
     private AthleteDAO() { }
 
+    private static final class AthleteDAOHolder {
+        static final AthleteDAO INSTANCE = new AthleteDAO();
+    }
+
     public static AthleteDAO getInstance() {
-        if (INSTANCE == null) {
-            synchronized (AthleteDAO.class) {
-                if (INSTANCE == null) {
-                    INSTANCE = new AthleteDAO();
-                }
-            }
-        }
-        return INSTANCE;
+        return AthleteDAOHolder.INSTANCE;
     }
 
     public String getSelectQueryById() {
         return "SELECT * FROM ATHLETES " +
                 "WHERE id = ?";
+    }
+
+    public String getSelectQueryForCsvFiles() {
+        return "SELECT * FROM CSVFILES " +
+                "WHERE AthleteId = ?";
     }
 
     public String getSelectAllQuery() {
@@ -81,6 +94,12 @@ public class AthleteDAO {
         return "INSERT INTO ATHLETES (name, surname, patronymic, birthday, gender, sport, \n" +
                 "hand, qualification) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     }
+
+    public String getUpdateQuery() {
+        return "UPDATE ATHLETES SET name=?, surname=?, patronymic=?, birthday=?, gender=?, sport=?, " +
+                "hand=?, qualification=? where id = ?";
+    }
+
 
     protected void prepareStatementForCreate(PreparedStatement statement, Athlete object) throws SQLException {
         statement.setString(1, object.getName());
@@ -120,12 +139,25 @@ public class AthleteDAO {
 
     public void addCsvFile(long athleteId, String fileName){
         try (PreparedStatement preparedStatement = ConnectionManager.getConnection()
-                .prepareStatement("INSERT INTO csvfiles (name, AthleteId) VALUES (?, ?)")) {
+                .prepareStatement("INSERT INTO csvfiles (name, AthletId) VALUES (?, ?)")) {
             preparedStatement.setString(1, fileName);
             preparedStatement.setLong(2, athleteId);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public List<String> findAllCsvFiles(){
+        List<String> list = new ArrayList<>();
+        try (ResultSet resultSet = ConnectionManager.getConnection()
+                .prepareStatement(getSelectAllQuery()).executeQuery()) {
+            while (resultSet.next()) {
+                list.add(resultSet.getString( "CSVFILES.name"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 }

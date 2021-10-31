@@ -3,7 +3,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CSVReader {
+public class CSVReader5 {
     public static List<Jump> readJumps(String fileName) throws IOException {
         au.com.bytecode.opencsv.CSVReader reader = new au.com.bytecode.opencsv.CSVReader(new FileReader(fileName));
         //Read all rows at once
@@ -13,6 +13,7 @@ public class CSVReader {
         ArrayList<Jump> jumps = new ArrayList<Jump>();
         Jump jump = new Jump();
         for(int i = 1; i < allRows.size(); i++){
+            jump = new Jump();
             String[] row = allRows.get(i);
             jump.setTimestamp(Double.parseDouble (row[0]));
             jump.setSync(Double.parseDouble (row[1]));
@@ -27,6 +28,7 @@ public class CSVReader {
             jumps.add(jump);
             // System.out.println(jump.toString());
         }
+      //  System.out.println("q");
         return jumps;
     }
 }

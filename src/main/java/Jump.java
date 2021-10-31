@@ -81,4 +81,44 @@ public class Jump {
     public void setCoPy(double coPy) {
         this.coPy = coPy;
     }
+
+    public double getTimestamp() {
+        return timestamp;
+    }
+
+    public double getSync() {
+        return sync;
+    }
+
+    public double getAux() {
+        return aux;
+    }
+
+    public double getFx() {
+        return fx;
+    }
+
+    public double getFy() {
+        return fy;
+    }
+
+    public double getMx() {
+        return mx;
+    }
+
+    public double getMy() {
+        return my;
+    }
+
+    public double getMz() {
+        return mz;
+    }
+
+    public double getCoPx() {
+        return coPx;
+    }
+
+    public double getCoPy() {
+        return coPy;
+    }
 }

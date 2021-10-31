@@ -1,9 +1,15 @@
+import au.com.bytecode.opencsv.CSVWriter;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.chart.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
@@ -13,10 +19,13 @@ import javafx.stage.Stage;
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
+import au.com.bytecode.opencsv.CSVReader;
+
+import javax.sound.sampled.Line;
+import java.io.*;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
-import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +34,7 @@ public class Run extends Application{
         private long currentAthleteId = 1L;
         private String filename = null;
         private String path = "";
+        private String savePath = "D:\\";
         static {
             nu.pattern.OpenCV.loadShared();
            // System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -49,8 +59,11 @@ public class Run extends Application{
             button2.setOnAction(this::showAthletes);
             button3.setOnAction(this::addCsvFile);
             button8.setOnAction(e -> {
-                setFilters(fileChooser);
-                filename = fileChooser.showOpenDialog(stage).toPath().toString();
+                try {
+                    start4(stage);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             });
             button17.setOnAction(e -> {
                 File file1 = fileChooser.showSaveDialog(stage);
@@ -191,7 +204,7 @@ public class Run extends Application{
             newStage.setScene(newScene);
             newStage.show();
         }
-        private void addCsvFile(ActionEvent e) {
+        private void addCsvFile2(ActionEvent e) {
             // Загружаем изображение из файла
             Mat img;
             try {
@@ -257,12 +270,63 @@ public class Run extends Application{
                 newStage.close();
             });
         }
+
+    private void addCsvFile(ActionEvent e){
+        Stage stage = new Stage();
+        stage.setTitle("add");
+        final FileChooser fileChooser = new FileChooser();
+        setFilters(fileChooser);
+        filename = fileChooser.showOpenDialog(stage).toPath().toString();
+        try {
+            currentAthleteId  = 1;
+            Athlete athlete = AthleteDAO.getInstance().findById(currentAthleteId);
+            CSVReader reader = new CSVReader(new FileReader(filename));
+            String csv = "D:\\"+athlete.getName()+athlete.getId()+"file.csv";
+            CSVWriter writer = new CSVWriter(new FileWriter(csv, true));
+            List<String[]> allRows = reader.readAll();
+            for(int i = 1; i < allRows.size(); i++) {
+                String[] row = allRows.get(i);
+                writer.writeNext(row);
+            }
+            AthleteDAO.getInstance().addCsvFile(athlete.getId(), csv);
+            writer.close();
+        } catch (IOException ignored){
+            System.out.println(ignored.getMessage());
+        }
+    }
         private void setFilters(FileChooser chooser) {
             chooser.getExtensionFilters().addAll(
-                    new FileChooser.ExtensionFilter("All Images", "*.*"),
-                    new FileChooser.ExtensionFilter("PNG", "*.png"),
-                    new FileChooser.ExtensionFilter("JPG", "*.jpg")
+                    new FileChooser.ExtensionFilter("CSV", "*.csv")
             );
         }
 
+    public void start4(Stage primaryStage) throws Exception{
+        List<Jump> list = CSVReader5.readJumps("AbalakovJump.csv");
+        list.forEach(System.out::println);
+       //Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
+        primaryStage.setTitle("JavaFX Chart (Series)");
+
+        NumberAxis x = new NumberAxis();
+        NumberAxis y = new NumberAxis();
+
+        LineChart<Number, Number> numberLineChart = new LineChart<>(x,y);
+        numberLineChart.setCreateSymbols(false);
+        numberLineChart.setTitle("Series");
+        XYChart.Series series1 = new XYChart.Series();
+        series1.setName("sin(x)");
+        ObservableList<XYChart.Data> datas = FXCollections.observableArrayList();
+        double i = 0;
+        for(Jump jump:list){
+            System.out.println(i+" "+jump.getFx());
+            datas.add(new XYChart.Data(i,jump.getFx()));
+            i+=0.1;
+        }
+        series1.setData(datas);
+
+        Scene scene = new Scene(numberLineChart, 600,600);
+        numberLineChart.getData().add(series1);
+        primaryStage.setScene(scene);
+
+        primaryStage.show();
+    }
     }
