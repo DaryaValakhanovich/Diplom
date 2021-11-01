@@ -20,15 +20,86 @@ public class CSVReader5 {
             jump.setAux(Double.parseDouble (row[2]));
             jump.setFx(Double.parseDouble (row[3]));
             jump.setFy(Double.parseDouble (row[4]));
-            jump.setMx(Double.parseDouble (row[5]));
-            jump.setMy(Double.parseDouble (row[6]));
-            jump.setMz(Double.parseDouble (row[7]));
-            jump.setCoPx(Double.parseDouble (row[8]));
-            jump.setCoPy(Double.parseDouble (row[9]));
+            jump.setFz(Double.parseDouble (row[5]));
+            jump.setMx(Double.parseDouble (row[6]));
+            jump.setMy(Double.parseDouble (row[7]));
+            jump.setMz(Double.parseDouble (row[8]));
+            jump.setCoPx(Double.parseDouble (row[9]));
+            jump.setCoPy(Double.parseDouble (row[10]));
             jumps.add(jump);
             // System.out.println(jump.toString());
         }
       //  System.out.println("q");
         return jumps;
     }
+
+    public static ArrayList<Double> cutFz(ArrayList<Double> arr) {
+        Double nearIzoline = average(arr);
+        int countHead = 0;
+        int countTail = arr.size()- 1;
+        for (int i = countHead; arr.get(i) < nearIzoline; i++){
+            countHead++;
+        }
+        for (int i = countTail; arr.get(i) < nearIzoline; i--){
+            countTail--;
+        }
+        ArrayList<Double> result = new ArrayList<>();
+        for(int i = countHead; i <= countTail; i++){
+            result.add(arr.get(i));
+        }
+        return result;
+    }
+    private static Double average(List<Double> values) {
+        return values.stream().mapToDouble(Double::doubleValue).average().getAsDouble();
+    }
+    public static double[] findMas(ArrayList<Double> list) throws IOException {
+        ArrayList<Integer> counts = new ArrayList<>();
+        ArrayList<Double> edges = new ArrayList<>();
+        double min = list.stream().min(Double::compare).get();
+        double max = list.stream().max(Double::compare).get();
+        double step = (max - min) / Math.sqrt(list.size());
+        edges.add(min);
+        double border;
+        int count;
+        while(min < max) {
+            border = min + step;
+            edges.add(border);
+            count = 0;
+            for (Double aDouble : list) {
+                if (min <= aDouble && aDouble < border) {
+                    count++;
+                }
+            }
+            counts.add(count);
+            min = border;
+        }
+        int indexOfMaxValue = counts.indexOf(counts.stream().max(Integer::compare).get());
+        Double izoline = edges.get(indexOfMaxValue);
+        double g = 9.81;
+        double P = izoline;
+        double mass=Math.round(P/g);
+        double[] mas = new double[2];
+        mas[0] = mass;
+        mas[1] = izoline;
+        return mas;
+    }
+
+    public static ArrayList<Double> readFz(String fileName) throws IOException {
+        au.com.bytecode.opencsv.CSVReader reader = new au.com.bytecode.opencsv.CSVReader(new FileReader(fileName));
+        List<String[]> allRows = reader.readAll();
+        ArrayList<Double> fz = new ArrayList<>();
+        String[] row = allRows.get(0);
+        int column = 0;
+        for (int i = 0;i<row.length;i++){
+            if(row[i].equals("Fz")){
+                column = i;
+            }
+        }
+        for(int i = 1; i < allRows.size(); i++){
+            row = allRows.get(i);
+            fz.add(Double.parseDouble (row[column]));
+        }
+        return fz;
+    }
+
 }
