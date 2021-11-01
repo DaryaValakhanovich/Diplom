@@ -1,4 +1,3 @@
-import au.com.bytecode.opencsv.CSVWriter;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -15,13 +14,6 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.opencv.core.*;
-import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
-import au.com.bytecode.opencsv.CSVReader;
-
-import java.io.*;
-
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,42 +34,16 @@ public class Run extends Application {
 
     public void start(Stage stage) {
         VBox root = new VBox(15.0);
-        final FileChooser fileChooser = new FileChooser();
         root.setAlignment(Pos.CENTER);
         Button button = new Button("Добавить спортсмена");
         Button button2 = new Button("Показать всех атлетов");
         Button button3 = new Button("Загрузить csv файл");
-        Button button4 = new Button("Масштабирование");
-        Button button7 = new Button("Поворот");
-        Button button5 = new Button("Сдвиг");
-        Button button6 = new Button("Вывод каждого канала изображения на экран");
-        Button button8 = new Button("Выбрать изображение");
-        Button button17 = new Button("Сохранить как");
         button.setOnAction(this::addAthlete);
         button2.setOnAction(this::showAthletes);
         button3.setOnAction(this::addCsvFile);
-        button8.setOnAction(e -> {
-            try {
-                start4(stage);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        });
-        button17.setOnAction(e -> {
-            File file1 = fileChooser.showSaveDialog(stage);
-            String path1 = file1.getPath();
-            path = file1.getParent();
-            CvUtilsFX.saveImage(Imgcodecs.imread(filename), path1 + ".png");
-        });
         root.getChildren().add(button);
         root.getChildren().add(button2);
         root.getChildren().add(button3);
-        root.getChildren().add(button4);
-        root.getChildren().add(button7);
-        root.getChildren().add(button5);
-        root.getChildren().add(button6);
-        root.getChildren().add(button8);
-        root.getChildren().add(button17);
 
         Scene scene = new Scene(root, 400.0, 400.0);
         stage.setTitle("OpenCV " + Core.VERSION);
@@ -167,15 +133,15 @@ public class Run extends Application {
                 athlete.setName(input1.getText());
                 athlete.setSurname(input2.getText());
                 athlete.setPatronymic(input3.getText());
-                athlete.setBirthday(LocalDate.parse(input4.getText()));
+                athlete.setAge(Integer.parseInt(input4.getText()));
                 athlete.setGender(Gender.valueOf(input5.getText()));
                 athlete.setSport(input6.getText());
                 athlete.setDominantHand(DominantHand.valueOf(input7.getText()));
-                athlete.setQualification(input8.getText());
+                athlete.setQualification(Qualification.valueOf(input8.getText()));
                 System.out.println(athlete.toString());
                 AthleteDAO.getInstance().create(athlete);
-            } catch (Exception ignored) {
-                System.out.println(ignored.getMessage());
+            } catch (Exception i) {
+                System.out.println(i.getMessage());
             }
         });
     }
@@ -201,74 +167,6 @@ public class Run extends Application {
         root.getChildren().addAll(texts);
         newStage.setScene(newScene);
         newStage.show();
-    }
-
-    private void addCsvFile2(ActionEvent e) {
-        // Загружаем изображение из файла
-        Mat img;
-        try {
-            img = Imgcodecs.imread(filename);
-            if (img.empty()) {
-                throw new Exception("Не удалось загрузить изображение");
-            }
-        } catch (Exception e1) {
-            System.out.println(e1.getMessage());
-            return;
-        }
-        Stage newStage = new Stage();
-        newStage.setTitle("Chose parameters");
-        Group root = new Group();
-        Scene newScene = new Scene(root, 300, 130);
-        Button newButton = new Button();
-        newButton.setLayoutX(130);
-        newButton.setLayoutY(100);
-        newButton.setText("OK");
-
-        Text text1 = new Text();
-        text1.setText("X:");
-        text1.setLayoutX(10);
-        text1.setLayoutY(30);
-        Text text2 = new Text();
-        text2.setText("Y:");
-        text2.setLayoutX(10);
-        text2.setLayoutY(70);
-        TextField input1 = new TextField();
-        input1.setLayoutX(120);
-        input1.setLayoutY(10);
-        TextField input2 = new TextField();
-        input2.setLayoutX(120);
-        input2.setLayoutY(50);
-
-        root.getChildren().addAll(newButton, input1, input2, text1, text2);
-        newStage.setScene(newScene);
-        newStage.show();
-        newButton.setOnAction(event16 -> {
-            try {
-                int movingX = Integer.parseInt(input1.getText());
-                int movingY = Integer.parseInt(input2.getText());
-                int movX = movingX;
-                if (movX <= 0) {
-                    movX = 0;
-                }
-                int movY = movingY;
-                if (movY >= 0) {
-                    movY = 0;
-                }
-                Mat mat = new Mat(2, 3, CvType.CV_32FC1);
-                mat.put(0, 0, 1, 0, movX, 0, 1, -movY
-                );
-                Imgproc.cvtColor(img, img, Imgproc.COLOR_BGR2BGRA);
-                Mat matImage2 = new Mat();
-                Imgproc.warpAffine(img, matImage2, mat,
-                        new Size(img.width() + Math.abs(movingX), img.height() + Math.abs(movingY)), Imgproc.INTER_LINEAR, Core.BORDER_CONSTANT, new Scalar(0, 0, 0, 255));
-                // Отображаем в отдельном окне
-                CvUtilsFX.showImage(matImage2, "Смещение");
-                // Сохраняем изображение в файл
-                CvUtilsFX.saveImage(matImage2, path + "movingExample.jpg");
-            } catch (NumberFormatException ignored) {
-            }
-            newStage.close();
-        });
     }
 
     private void addCsvFile(ActionEvent e) {
@@ -304,7 +202,7 @@ public class Run extends Application {
         );
     }
 
-    public void start4(Stage primaryStage) throws Exception {
+    private void start4(Stage primaryStage) throws Exception {
         Athlete athlete = AthleteDAO.getInstance().findById(currentAthleteId);
         primaryStage.setTitle("Interface of \"Start Analyzing\" button");
 

@@ -91,12 +91,12 @@ public class AthleteDAO {
     }
 
     public String getCreateQuery() {
-        return "INSERT INTO ATHLETES (name, surname, patronymic, birthday, gender, sport, \n" +
+        return "INSERT INTO ATHLETES (name, surname, patronymic, age, gender, sport, \n" +
                 "hand, qualification) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     }
 
     public String getUpdateQuery() {
-        return "UPDATE ATHLETES SET name=?, surname=?, patronymic=?, birthday=?, gender=?, sport=?, " +
+        return "UPDATE ATHLETES SET name=?, surname=?, patronymic=?, age=?, gender=?, sport=?, " +
                 "hand=?, qualification=? where id = ?";
     }
 
@@ -105,11 +105,11 @@ public class AthleteDAO {
         statement.setString(1, object.getName());
         statement.setString(2, object.getSurname());
         statement.setString(3, object.getPatronymic());
-        statement.setString(4, object.getBirthday().toString());
+        statement.setInt(4, object.getAge());
         statement.setString(5, object.getGender().toString());
         statement.setString(6, object.getSport());
         statement.setString(7, object.getDominantHand().toString());
-        statement.setString(8, object.getQualification());
+        statement.setString(8, object.getQualification().toString());
     }
 
     public Athlete createFromResultSet(ResultSet resultSet) throws SQLException {
@@ -118,11 +118,11 @@ public class AthleteDAO {
         athlete.setName(resultSet.getString(ATHLETE_TABLE_NAME + ".name"));
         athlete.setSurname(resultSet.getString(ATHLETE_TABLE_NAME + ".surname"));
         athlete.setPatronymic(resultSet.getString(ATHLETE_TABLE_NAME + ".patronymic"));
-        athlete.setBirthday(LocalDate.parse(resultSet.getString(ATHLETE_TABLE_NAME + ".birthday")));
+        athlete.setAge(resultSet.getInt(ATHLETE_TABLE_NAME + ".age"));
         athlete.setGender(Gender.valueOf(resultSet.getString(ATHLETE_TABLE_NAME + ".gender")));
         athlete.setSport(resultSet.getString(ATHLETE_TABLE_NAME + ".sport"));
         athlete.setDominantHand(DominantHand.valueOf(resultSet.getString(ATHLETE_TABLE_NAME + ".hand")));
-        athlete.setQualification(resultSet.getString(ATHLETE_TABLE_NAME + ".qualification"));
+        athlete.setQualification(Qualification.valueOf(resultSet.getString(ATHLETE_TABLE_NAME + ".qualification")));
         return  athlete;
     }
 

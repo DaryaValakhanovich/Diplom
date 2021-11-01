@@ -1,33 +1,41 @@
+import lombok.*;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 
+
 public class Athlete {
+
     private long id;
     private String name;
     private String surname;
     private String patronymic;
-    private LocalDate birthday;
+    private int age;
     private Gender gender;
     private String sport;
     private DominantHand dominantHand;
-    private String qualification;
+    private Qualification qualification;
     private ArrayList<String> csvFiles;
 
     public Athlete() {
         csvFiles = new ArrayList<>();
     }
 
-    public Athlete(String name, String surname, String patronymic, LocalDate birthday,
-                   Gender gender, String sport, DominantHand dominantHand, String qualification) {
+    public Athlete(String name, String surname, String patronymic, int age,
+                   Gender gender, String sport, DominantHand dominantHand, Qualification qualification) {
         this.name = name;
         this.surname = surname;
         this.patronymic = patronymic;
-        this.birthday = birthday;
+        this.age = age;
         this.gender = gender;
         this.sport = sport;
         this.dominantHand = dominantHand;
         this.qualification = qualification;
         csvFiles = new ArrayList<>();
+    }
+
+    public void addCsvFile(String file){
+        csvFiles.add(file);
     }
 
     public long getId() {
@@ -62,12 +70,12 @@ public class Athlete {
         this.patronymic = patronymic;
     }
 
-    public LocalDate getBirthday() {
-        return birthday;
+    public int getAge() {
+        return age;
     }
 
-    public void setBirthday(LocalDate birthday) {
-        this.birthday = birthday;
+    public void setAge(int age) {
+        this.age = age;
     }
 
     public Gender getGender() {
@@ -94,11 +102,11 @@ public class Athlete {
         this.dominantHand = dominantHand;
     }
 
-    public String getQualification() {
+    public Qualification getQualification() {
         return qualification;
     }
 
-    public void setQualification(String qualification) {
+    public void setQualification(Qualification qualification) {
         this.qualification = qualification;
     }
 
@@ -108,25 +116,5 @@ public class Athlete {
 
     public void setCsvFiles(ArrayList<String> csvFiles) {
         this.csvFiles = csvFiles;
-    }
-
-    public void addCsvFile(String file){
-        csvFiles.add(file);
-    }
-
-    @Override
-    public String toString() {
-        return "Athlete{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", surname='" + surname + '\'' +
-                ", patronymic='" + patronymic + '\'' +
-                ", birthday=" + birthday +
-                ", gender=" + gender +
-                ", sport='" + sport + '\'' +
-                ", dominantHand=" + dominantHand +
-                ", qualification='" + qualification + '\'' +
-                ", csvFiles=" + csvFiles +
-                '}';
     }
 }
