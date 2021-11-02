@@ -1,5 +1,5 @@
 public enum Gender {
-    MALE("Мужчина"), FEMALE("Женщина");
+    MALE("MALE"), FEMALE("FEMALE");
 
     private String title;
 

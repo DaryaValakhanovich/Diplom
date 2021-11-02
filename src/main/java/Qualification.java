@@ -23,4 +23,14 @@ public enum Qualification {
         }
         return result;
     }
+
+    public static Qualification getValueFromTitle(String title)
+    {
+        Qualification mas[] = values();
+        for(Qualification q:mas){
+            if (title.equals(q.getTitle()))
+                return q;
+        }
+        return null;
+    }
 }

@@ -1,5 +1,5 @@
 public enum DominantHand {
-    RIGHT("Правша"),  LEFT("Левша");
+    RIGHT("RIGHT"),  LEFT("LEFT");
 
     private String title;
 
