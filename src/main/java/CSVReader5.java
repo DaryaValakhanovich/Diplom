@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CSVReader5 {
-    public static List<Jump> readJumps(String fileName) throws IOException {
+   /* public static List<Jump> readJumps(String fileName) throws IOException {
         au.com.bytecode.opencsv.CSVReader reader = new au.com.bytecode.opencsv.CSVReader(new FileReader(fileName));
         //Read all rows at once
         List<String[]> allRows = reader.readAll();
@@ -31,7 +31,7 @@ public class CSVReader5 {
         }
       //  System.out.println("q");
         return jumps;
-    }
+    }*/
 
     public static ArrayList<Double> cutFz(ArrayList<Double> arr) {
         Double nearIzoline = average(arr);

@@ -3,7 +3,6 @@ import lombok.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-
 public class Athlete {
 
     private long id;
@@ -117,4 +116,21 @@ public class Athlete {
     public void setCsvFiles(ArrayList<String> csvFiles) {
         this.csvFiles = csvFiles;
     }
+
+    @Override
+    public String toString() {
+        return "Athlete{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", surname='" + surname + '\'' +
+                ", patronymic='" + patronymic + '\'' +
+                ", age=" + age +
+                ", gender=" + gender +
+                ", sport='" + sport + '\'' +
+                ", dominantHand=" + dominantHand +
+                ", qualification=" + qualification +
+                ", csvFiles=" + csvFiles +
+                '}';
+    }
 }
+
