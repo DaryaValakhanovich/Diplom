@@ -1,3 +1,5 @@
+import au.com.bytecode.opencsv.CSVReader;
+import au.com.bytecode.opencsv.CSVWriter;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -14,6 +16,15 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.opencv.core.*;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,8 +32,9 @@ public class Run extends Application {
     private long currentAthleteId = 1L;
     private String filename = null;
     private String path = "";
-    private String savePath = "D:\\";
+    private String savePath = "D:\\\\Diplom\\";
     private double samplingFrequency;
+    private String exercise = "Exercise";
 
     static {
         nu.pattern.OpenCV.loadShared();
@@ -63,14 +75,14 @@ public class Run extends Application {
         int textX = 10;
         int inputX = 110;
 
-        Help.createText("Name: ", textX, 40,elements);
-        Help.createText("Surname: ", textX, 80,elements);
-        Help.createText("Patronymic: ", textX, 120,elements);
-        Help.createText("Age: ", textX, 160,elements);
-        Help.createText("Gender: ", textX, 195,elements);
-        Help.createText("Sport: ", textX, 235,elements);
-        Help.createText("Dominant hand: ", textX, 275,elements);
-        Help.createText("Qualification: ", textX, 315,elements);
+        Help.createText("Name: ", textX, 40, elements);
+        Help.createText("Surname: ", textX, 80, elements);
+        Help.createText("Patronymic: ", textX, 120, elements);
+        Help.createText("Age: ", textX, 160, elements);
+        Help.createText("Gender: ", textX, 195, elements);
+        Help.createText("Sport: ", textX, 235, elements);
+        Help.createText("Dominant hand: ", textX, 275, elements);
+        Help.createText("Qualification: ", textX, 315, elements);
 
         TextField input1 = new TextField();
         input1.setLayoutX(inputX);
@@ -169,14 +181,14 @@ public class Run extends Application {
         int textX = 10;
         int inputX = 110;
 
-        Help.createText("Name: ", textX, 40,elements);
-        Help.createText("Surname: ", textX, 80,elements);
-        Help.createText("Patronymic: ", textX, 120,elements);
-        Help.createText("Age: ", textX, 160,elements);
-        Help.createText("Gender: ", textX, 195,elements);
-        Help.createText("Sport: ", textX, 235,elements);
-        Help.createText("Dominant hand: ", textX, 275,elements);
-        Help.createText("Qualification: ", textX, 315,elements);
+        Help.createText("Name: ", textX, 40, elements);
+        Help.createText("Surname: ", textX, 80, elements);
+        Help.createText("Patronymic: ", textX, 120, elements);
+        Help.createText("Age: ", textX, 160, elements);
+        Help.createText("Gender: ", textX, 195, elements);
+        Help.createText("Sport: ", textX, 235, elements);
+        Help.createText("Dominant hand: ", textX, 275, elements);
+        Help.createText("Qualification: ", textX, 315, elements);
 
         TextField input1 = new TextField();
         input1.setLayoutX(inputX);
@@ -213,7 +225,7 @@ public class Run extends Application {
         gender1.setSelected(true);
         gender1.setToggleGroup(group);
         gender2.setToggleGroup(group);
-        (athlete.getGender().equals(Gender.FEMALE)?gender1:gender2).setSelected(true);
+        (athlete.getGender().equals(Gender.FEMALE) ? gender1 : gender2).setSelected(true);
         elements.add(gender1);
         elements.add(gender2);
 
@@ -228,7 +240,7 @@ public class Run extends Application {
         ToggleGroup group2 = new ToggleGroup();
         hand1.setToggleGroup(group2);
         hand2.setToggleGroup(group2);
-        (athlete.getDominantHand().equals(DominantHand.RIGHT)?hand1:hand2).setSelected(true);
+        (athlete.getDominantHand().equals(DominantHand.RIGHT) ? hand1 : hand2).setSelected(true);
         hand1.setLayoutX(inputX);
         hand1.setLayoutY(260);
         hand2.setLayoutX(200);
@@ -300,35 +312,45 @@ public class Run extends Application {
     }
 
     private void addCsvFile(ActionEvent e) {
+        Athlete athlete = AthleteDAO.getInstance().findById(currentAthleteId);
         Stage stage = new Stage();
         stage.setTitle("add");
         final FileChooser fileChooser = new FileChooser();
         setFilters(fileChooser);
-        // fileChooser.setInitialDirectory(new File(savePath+AthleteDAO.getInstance().findById(currentAthleteId).getSurname()+"\\"));
+        if (Files.notExists(Paths.get(savePath))) {
+            try {
+                Files.createDirectory(Paths.get(savePath));
+            } catch (IOException ignored) {
+            }
+        }
+        if (Files.notExists(Paths.get(savePath + athlete.getSurname() + "\\"))) {
+            try {
+                Files.createDirectory(Paths.get(savePath + athlete.getSurname() + "\\"));
+            } catch (IOException ignored) {
+            }
+        }
+        fileChooser.setInitialDirectory(new File(savePath + athlete.getSurname() + "\\"));
         filename = fileChooser.showOpenDialog(stage).toPath().toString();
         try {
-            System.out.println(filename);
-        /*    List<String> csvFiles = AthleteDAO.getInstance().findAllCsvFiles();
+            List<String> csvFiles = AthleteDAO.getInstance().findAllCsvFilesByAthleteId(athlete.getId());
             boolean isAlreadyExisted = false;
-            for(String s:csvFiles){
-                if(s.equals(filename)){
+            for (String s : csvFiles) {
+                if ((s.substring(0,3)+s.substring(4)).equals(filename)) {
                     isAlreadyExisted = true;
+                    break;
                 }
             }
-            if(!isAlreadyExisted){
-                Athlete athlete = AthleteDAO.getInstance().findById(currentAthleteId);
-            CSVReader reader = new CSVReader(new FileReader(filename));
-            String csv = "D:\\" + athlete.getName() + athlete.getId() + "file.csv";
-            CSVWriter writer = new CSVWriter(new FileWriter(csv, true));
-            List<String[]> allRows = reader.readAll();
-            for (int i = 1; i < allRows.size(); i++) {
-                String[] row = allRows.get(i);
-                writer.writeNext(row);
+            if (!isAlreadyExisted) {
+                CSVReader reader = new CSVReader(new FileReader(filename));
+                String csv = savePath + athlete.getSurname() + "\\" + exercise + (csvFiles.size()+1) + ".csv";
+                CSVWriter writer = new CSVWriter(new FileWriter(csv, true));
+                List<String[]> allRows = reader.readAll();
+                for (String[] row : allRows) {
+                    writer.writeNext(row);
+                }
+                AthleteDAO.getInstance().addCsvFile(athlete.getId(), csv);
+                writer.close();
             }
-            AthleteDAO.getInstance().addCsvFile(athlete.getId(), csv);
-            writer.close();
-            }*/
-
             start4(stage);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -342,12 +364,12 @@ public class Run extends Application {
     }
 
     private void start4(Stage primaryStage) throws Exception {
-        //Athlete athlete = AthleteDAO.getInstance().findById(currentAthleteId);
+        Athlete athlete = AthleteDAO.getInstance().findById(currentAthleteId);
         primaryStage.setTitle("Interface of \"Start Analyzing\" button");
 
         Group root = new Group();
         Text text1 = new Text();
-        //  text1.setText(athlete.getSurname()+", Exercise name");
+        text1.setText(athlete.getSurname() + ", Exercise name");
         text1.setLayoutX(10);
         text1.setLayoutY(20);
 
@@ -377,7 +399,7 @@ public class Run extends Application {
         series2.setData(datas2);
 
         Text text2 = new Text();
-        text2.setText("Athlete weight, kg: "+mas);
+        text2.setText("Athlete weight, kg: " + mas);
         text2.setLayoutX(150);
         text2.setLayoutY(20);
 
@@ -397,10 +419,11 @@ public class Run extends Application {
 
         numberLineChart.getData().addAll(series1, series2);
         numberLineChart.setLayoutY(40);
-        numberLineChart.setMinSize(700,400);
-        root.getChildren().addAll(text1,text2, text3, input3,upgradeButton, numberLineChart);
-        Scene scene = new Scene( root, 800, 600);
+        numberLineChart.setMinSize(700, 400);
+        root.getChildren().addAll(text1, text2, text3, input3, upgradeButton, numberLineChart);
+        Scene scene = new Scene(root, 800, 600);
 
+        System.out.println("Izoline: " + isoLine);
         primaryStage.setScene(scene);
         primaryStage.show();
         upgradeButton.setOnAction(ev -> {

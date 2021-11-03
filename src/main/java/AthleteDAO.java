@@ -137,15 +137,20 @@ public class AthleteDAO {
         }
     }
 
-    public void addCsvFile(long athleteId, String fileName){
+    public long addCsvFile(long athleteId, String fileName){
         try (PreparedStatement preparedStatement = ConnectionManager.getConnection()
-                .prepareStatement("INSERT INTO csvfiles (name, AthletId) VALUES (?, ?)")) {
+                .prepareStatement("INSERT INTO csvfiles (name, AthletId) VALUES (?, ?)",  Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, fileName);
             preparedStatement.setLong(2, athleteId);
             preparedStatement.executeUpdate();
+            ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                return generatedKeys.getLong(1);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return 0;
     }
 
     public List<String> findAllCsvFiles(){
@@ -153,7 +158,20 @@ public class AthleteDAO {
         try (ResultSet resultSet = ConnectionManager.getConnection()
                 .prepareStatement(getSelectAllQuery()).executeQuery()) {
             while (resultSet.next()) {
-                list.add(resultSet.getString( "CSVFILES.name"));
+                list.add(resultSet.getString( "name"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+    public List<String> findAllCsvFilesByAthleteId(long athleteId) {
+        List<String> list = new ArrayList<>();
+        try (ResultSet resultSet = ConnectionManager.getConnection()
+                .prepareStatement("SELECT * FROM CSVFILES " +
+                        "WHERE AthletId = "+athleteId).executeQuery()) {
+            while (resultSet.next()) {
+                list.add(resultSet.getString( "name"));
             }
         } catch (SQLException e) {
             e.printStackTrace();

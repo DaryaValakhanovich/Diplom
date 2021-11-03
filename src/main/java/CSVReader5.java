@@ -37,10 +37,10 @@ public class CSVReader5 {
         Double nearIzoline = average(arr);
         int countHead = 0;
         int countTail = arr.size()- 1;
-        for (int i = countHead; arr.get(i) < nearIzoline; i++){
+        for (int i = 0; arr.get(i) < nearIzoline; i++){
             countHead++;
         }
-        for (int i = countTail; arr.get(i) < nearIzoline; i--){
+        for (int i = arr.size()-1; arr.get(i) < nearIzoline; i--){
             countTail--;
         }
         ArrayList<Double> result = new ArrayList<>();
@@ -52,32 +52,35 @@ public class CSVReader5 {
     private static Double average(List<Double> values) {
         return values.stream().mapToDouble(Double::doubleValue).average().getAsDouble();
     }
-    public static double[] findMas(ArrayList<Double> list) throws IOException {
+
+    public static double[] findMas(ArrayList<Double> list){
         ArrayList<Integer> counts = new ArrayList<>();
         ArrayList<Double> edges = new ArrayList<>();
-        double min = list.stream().min(Double::compare).get();
-        double max = list.stream().max(Double::compare).get();
-        double step = (max - min) / Math.sqrt(list.size());
-        edges.add(min);
-        double border;
-        int count;
-        while(min < max) {
-            border = min + step;
-            edges.add(border);
-            count = 0;
+        double leftBorder = list.stream().min(Double::compare).get();
+        double finalBorder = list.stream().max(Double::compare).get();
+        double step = (finalBorder - leftBorder) / Math.sqrt(list.size());
+        edges.add(leftBorder);
+        double rightBorder;
+        int count = 0;
+        while(leftBorder < finalBorder) {
+            rightBorder = leftBorder + step;
+            edges.add(rightBorder);
             for (Double aDouble : list) {
-                if (min <= aDouble && aDouble < border) {
+                if (leftBorder <= aDouble && aDouble < rightBorder) {
                     count++;
                 }
             }
             counts.add(count);
-            min = border;
+            count = 0;
+            leftBorder = rightBorder;
         }
         int indexOfMaxValue = counts.indexOf(counts.stream().max(Integer::compare).get());
-        Double izoline = edges.get(indexOfMaxValue);
+        Double izoline = edges.get(++indexOfMaxValue);
         double g = 9.81;
         double P = izoline;
+        System.out.println(indexOfMaxValue);
         double mass=Math.round(P/g);
+        System.out.println(P/g);
         double[] mas = new double[2];
         mas[0] = mass;
         mas[1] = izoline;
